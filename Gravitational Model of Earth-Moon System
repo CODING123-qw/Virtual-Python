@@ -1,0 +1,81 @@
+
+# Constants
+tgraph = gcurve(color=color.red)
+G = 6.7e-11
+REarth = 6.4e6 # radius of Earth
+mEarth = 6e24  # mass of Earth
+mCraft = 175 # mass of spacecraft
+mMoon = 7e22
+rMoon = 1.75e6
+d = 4e8
+
+# Objects and initial values
+Moon = sphere(pos = vec(-d, 0, 0), radius = rMoon, color = color.red)
+Earth = sphere(pos=vec(0,0,0), radius = REarth, color=color.cyan )
+Craft =  sphere(pos=Earth.pos + vec((10*REarth), 0, 0), color=color.magenta,  make_trail = True, radius  = REarth/12 )
+v0 = vec(0,3274.889,0)
+pCraft = mCraft * v0
+
+Craft.Fpar = vec(0,0,0)
+Craft.Fperp = vec(0,0, 0)
+
+  
+deltat = 100
+t = 0
+
+# move camera to give a better view
+scene.center = vec(-2e8, 0, 0)  
+# don't let camera zoom out automatically (you can still do it manually)
+scene.autoscale = False  
+
+
+g1 = graph(height = 300, title="Energy vs separation", xtitle="r (m)", ytitle="Energy (J)", xmin=0)
+gU = gcurve(color=color.blue, label="U", dot=True)
+gK = gcurve(color=color.red, label="K")
+gKplusU = gcurve(color=color.cyan, label="K+U")
+
+
+
+while t < 1e7:
+  rate(5000)
+  r = Craft.pos - Earth.pos
+  r2 = Craft.pos - Moon.pos
+  
+  ForceG = -(G * mEarth  * mCraft)/(r.mag**3)*r
+  ForceG2 = -(G * mMoon  * mCraft)/(r2.mag**3)*r2
+  pCraft += (ForceG + ForceG2) *deltat
+  
+  Craft.Fpar = dot( ForceG, hat(pCraft)) * hat(pCraft)
+  Craft.Fperp = (ForceG + ForceG2) - Craft.Fpar
+  
+
+  Craft.pos += (pCraft/mCraft)*deltat
+ 
+ 
+  U = (-(G*mEarth * mCraft)/r.mag) + (-(G*mMoon*mCraft)/r2.mag);
+  K = 1/2 * mCraft * ((pCraft/mCraft).mag**2)
+  
+  gU.plot(t, U)
+  gK.plot(t, K)
+  gKplusU.plot(t, K + U)
+  
+  
+  attach_arrow(Craft, "Fpar", scale = 40000000, color = color.yellow)
+  attach_arrow(Craft, "Fperp", scale =40000000, color = color.red)
+ 
+
+
+  
+  if(r.mag < REarth):
+    print("Crashed on Earth")
+    break
+  if(r2.mag < rMoon):
+    print("Crashed on Earth")
+    break
+  
+  tgraph.plot(t, ForceG.x)
+  t = t + deltat
+ 
+
+
+
