@@ -1,0 +1,40 @@
+# Constants
+tgraph = gcurve(color=color.red)
+G = 6.7e-11
+REarth = 6.4e6 # radius of Earth
+mEarth = 6e24  # mass of Earth
+mCraft = 175 # mass of spacecraft
+
+# Objects and initial values
+
+Earth = sphere(pos=vec(0,0,0), radius = REarth, color=color.cyan )
+Craft =  sphere(pos=Earth.pos + vec((REarth+40000), 0, 0), color=color.magenta,  make_trail = True, radius  = REarth/12 )
+v0 = vec(11208,0,0)
+pCraft = mCraft * v0
+
+deltat = 2
+t = 0
+
+# move camera to give a better view
+scene.center = vec(2*REarth, 0, 0)  
+# don't let camera zoom out automatically (you can still do it manually)
+scene.autoscale = False  
+
+
+while t < 1e7:
+  rate(100)
+  r = Craft.pos - Earth.pos
+  ForceG = -(G * mEarth  * mCraft)/(r.mag**3)*r
+  pCraft += ForceG*deltat
+  Craft.pos += (pCraft/mCraft)*deltat
+  
+  
+  if(r.mag < REarth):
+    print("Crashed on Earth")
+    break
+  
+  tgraph.plot(t, (pCraft/mCraft).x)
+  t = t + deltat
+  
+
+
