@@ -1,0 +1,45 @@
+vgraph = graph(xtitle = "angle", ytitle = "range", width = 400, height = 200)
+vgraph = gcurve(color = color.red, graph = vgraph)
+ball = sphere(pos = vector(-100,0,0), radius = 1, color=color.blue, make_trail = True)
+level = box(pos = vector(0,0,0), width = 5, height=1, length=200)
+
+#Constants and Variables
+mBall = 5;
+pi = 3.14159265
+x = (10*pi)/180
+max = 0
+angle = 0
+range_= 0
+
+#Start of For Loop
+for i in range(9):
+#Calculating the Initial Velocity, ForceG, and Momentum Before Launching
+ velocity = vector(100*cos(x), 100*sin(x),0)
+ ForceG = vector(0, mBall * -9.8, 0)
+ pBall = mBall * velocity;
+ t = 0;
+ deltat = .01;
+
+ while(t <= 1e7):
+   rate(500)
+#Calculating Drag Force
+   ForceD = .0078 * (pBall/mBall).mag * -(pBall/mBall)
+   pBall += (ForceG + ForceD)* deltat
+   ball.pos += (pBall/mBall)*deltat
+   range_ = ((pBall/mBall).y**2 * sin(2*x))/9.8
+#Finding Maximum Angle
+   if(range_ > max):
+    max = range_
+    angle = x
+   t = t + deltat
+# Moving to the Next
+   if(ball.pos.y <= 0):
+     x = x + (10*pi)/180
+     ball.pos = vector(-100,0,0)
+     break;
+ if(x > 90*(pi)/180):
+   break;
+angle = angle * (180/pi)
+angle = round(angle)
+print("The angle that causes the maximum range is " + angle)
+  
