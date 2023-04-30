@@ -1,0 +1,121 @@
+scene.width = 800
+scene.height = 450
+scene.background = color.white
+scene.forward = vector( -0.03, -0.5, -0.8)  ## change camera angle
+scene.range = 0.065 ## move camera back a little
+tgraph = gcurve(color=color.red)
+ 
+# cyclotron dimensions
+radius = .05
+gap = .005     # gap between dees is 0.5cm
+
+# field information
+deltaV = 5000    ## max potential difference between the dees
+
+E0 = vector(deltaV/gap,0,0)
+
+Escale = 0.015/mag(E0)
+B = vector(0,1.0,0)
+Bscale = 0.01
+
+# constants
+qe = 1.6e-19
+mzofp = 1e-7
+
+proton = sphere(pos=vector(0,0,0), radius=0.0001*8, color=color.red, q=qe,
+                p=vector(0,0,0), m=1.7e-27, v = vector(0,0,0), make_trail = True)
+
+setup()  ## draw stuff
+
+################################################################################################
+scene.pause()  ## pause until mouse is clicked
+
+B = vector(0,1.0,0)
+
+omega = (proton.q/proton.m)*mag(B)
+momentum = proton.v * proton.m
+
+dt = 1e-11
+t = 0
+Fe =0;
+while mag(proton.pos) < radius:
+  rate(10000)
+    # calculate new value of E here, based on E0 and t
+  E = E0*cos(omega*t)
+  showE();
+  Fm = cross((proton.p/proton.m) * qe, B);
+  if(proton.pos.x > -gap/2 and proton.pos.x < gap/2):
+    Fe = E*qe;
+  else:
+    Fe = vector(0,0,0)
+   
+  KE = proton.m * (mag(proton.p)/proton.m)**2 * .05
+   
+      # this will show the varying E field that you calculate
+       
+    # calculate Fnet depending on whether proton is in gap or inside a dee
+  Fnet = Fm + Fe
+  proton.p += Fnet*dt
+  proton.pos += (proton.p/proton.m)*dt
+  tgraph.plot(t, KE)
+    # update p, v, and position
+
+
+  t = t+dt   
+
+
+#####################################################################################################
+
+# this code sets up the display
+# you don't need to read it unless you are interested
+
+def make_E_arrows(): # this function creates a list of arrows to visualize E
+    global Earrlist
+    Earrlist = []
+    for z in arange(-0.8*radius, radius, radius/3.):
+        Earrlist.append(arrow(pos=vector(0,0,z), axis=E0*Escale, color=color.orange))
+        
+def showE():
+    for Earr in Earrlist:
+        Earr.axis = E*Escale
+
+
+def showB(B1): # this function  displays a uniform magnetic field
+    rr = arange(-0.6*radius, 0.65*radius, 0.4*radius)
+    for x in rr:
+        for z in rr:
+            arrow(pos=vector(x,0,z), color=color.cyan, axis=B1*Bscale)
+
+
+def makedee2(r, y, gapdist, flip):  ## this function draws one dee of a cyclotron
+    cr = 0.0002
+    dcolor=color.gray(0.4)
+    dtop = curve(color=dcolor, radius=cr)
+    dbot = curve(color=dcolor, radius=cr)
+    phi = 0
+    dphi = pi/20
+    while phi < pi+dphi:
+        x = flip * (r * sin(phi) + gapdist/2)
+        z = r*cos(phi)
+        pos1 = vector(x,y,z)
+        pos2 = vector(x,-y,z)
+        dtop.append(pos=pos1)
+        dbot.append(pos=pos2)
+        a = curve(color=dcolor, radius=cr)
+        a.append(pos=pos1)
+        a.append(pos=pos2)
+        phi += dphi
+    b = curve(color=dcolor, radius=cr)
+    b.append(pos=vector(flip*gapdist/2,y,r))
+    b.append(pos=vector(flip*gapdist/2,y,-r))
+    b.append(pos=vector(flip*gapdist/2,-y,-r))
+    b.append(pos=vector(flip*gapdist/2,-y,r))
+    
+def setup():  # this function sets up the screen by drawing stuff
+    global E
+    ## create the display, by drawing cyclotron dees and making various arrows
+    makedee2 (radius, .010, gap, -1)  ## call a function to draw one dee
+    makedee2 (radius, .010, gap, 1)   ## call function to draw second dee
+    showB( B )  ## call a function to draw magnetic field
+    make_E_arrows()  ## call a function to create a list of arrows to show E
+    E = E0
