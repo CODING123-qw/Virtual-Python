@@ -1,0 +1,65 @@
+GlowScript 2.9 VPython  # necessary here
+q = 1.6e-19
+particle = sphere(pos=vector(-10e-7,0,0), radius=2e-8, color=color.yellow)
+particle.v = vector(2e3, 0, 0)
+t = 0
+
+pi = 3.14159265
+
+obs01 = sphere(pos=vec(0,2e-7,0), radius=particle.radius, color=color.cyan, visible=False, B=vector(0,0,0))
+obs02 = sphere(pos=vec(0,0,2e-7), radius=particle.radius, color=color.cyan, visible=False, B=vector(0,0,0))
+obs03 = sphere(pos=vec(0,-2e-7,0), radius=particle.radius, color=color.cyan, visible=False, B=vector(0,0,0))
+obs04 = sphere(pos=vec(0,0,-2e-7), radius=particle.radius, color=color.cyan, visible=False, B=vector(0,0,0))
+obs05 = sphere(pos=vec(5e-7,0,0), radius=particle.radius, color=color.cyan, visible=False, B=vector(0,0,0))
+obs06 = sphere(pos=vec(-5e-7, 0,0), radius=particle.radius, color=color.cyan, visible=False, B=vector(0,0,0))
+
+
+
+
+
+r1 =  obs01.pos- particle.pos
+r2 = obs02.pos- particle.pos
+r3 = obs03.pos- particle.pos
+r4= obs04.pos- particle.pos
+r5= obs05.pos- particle.pos
+r6= obs06.pos- particle.pos
+
+
+attach_arrow(obs01, "B", scale=10000, shaftwidth = obs01.radius)
+attach_arrow(obs02, "B", scale=10000, shaftwidth = obs01.radius)
+attach_arrow(obs03, "B", scale=10000, shaftwidth = obs01.radius)
+attach_arrow(obs04, "B", scale=10000, shaftwidth = obs01.radius)
+attach_arrow(obs05, "B", scale=10000, shaftwidth = obs01.radius)
+attach_arrow(obs06, "B", scale=10000, shaftwidth = obs01.radius)
+
+
+
+
+
+deltat = 1e-12
+while t < 1e2:
+  rate(1000)
+  
+  
+  r1 =obs01.pos- particle.pos
+  r2 =obs02.pos- particle.pos  
+  r3 =obs03.pos- particle.pos
+  r4= obs04.pos- particle.pos
+  r5= obs05.pos- particle.pos
+  r6= obs06.pos- particle.pos
+
+
+  obs01.B = 1e-7 * cross(q*particle.v, r1)/ (mag(r1)**3);
+  obs02.B = 1e-7 * cross(q*particle.v, r2)/ (mag(r2)**3);
+  obs03.B = 1e-7 * cross(q*particle.v, r3)/ (mag(r3)**3);
+  obs04.B = 1e-7 * cross(q*particle.v, r4)/ (mag(r4)**3);
+  obs05.B = 1e-7 * cross(q*particle.v, r5)/ (mag(r5)**3);
+  obs06.B = 1e-7 * cross(q*particle.v, r6)/ (mag(r6)**3);
+  
+
+  
+  particle.pos = particle.pos + particle.v*deltat
+ 
+  t = t + deltat
+  
+print(obs01.B)
