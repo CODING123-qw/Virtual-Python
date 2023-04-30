@@ -1,0 +1,68 @@
+# scene.width = 1000
+# scene.height = 600
+scene.height = 500
+scene.background = color.white
+
+B = vector(0,.5,0)
+
+setup()
+
+particle = sphere(pos = vector(-0.3,0,0), radius = 0.0125, make_trail=True, interval=50, color = color.red)
+particle.charge = 1.6e-19
+particle.mass = 1.7e-27
+
+particle.v = vector(0,0,-1.5e7)
+attach_arrow(particle, "v", scale=1e-8, color=color.green)
+
+particle.Fmag = vec(0,0,0)
+attach_arrow(particle, "Fmag", scale=1e11, color=color.black)
+
+particle.p = particle.mass*particle.v ## initial momentum
+
+dt = 2.5e-11
+t = 0
+
+while True:
+    rate(500)
+    # your code goes here
+    particle.Fmag = cross((particle.charge* particle.v),B)
+    particle.p += (particle.Fmag)*dt;
+    particle.v = particle.p/particle.mass
+    particle.pos += particle.v*dt
+
+    
+    
+## the following code creates the grid, arrows representing B, and rings
+## you don't need to read it unless you're interested in how this was done
+
+
+def setup():
+    grid = []
+    xmax = 0.5
+    dx = xmax/5
+    r = 0.002
+    for x in arange(-xmax, xmax+dx, dx):
+        grid.append(curve(pos=[vector(x,-xmax,-xmax),vector(x,-xmax,xmax)], color=color.gray(0.4), radius=r))
+    for z in arange(-xmax, xmax+dx, dx):
+        grid.append(curve(pos=[vector(-xmax,-xmax,z),vector(xmax,-xmax,z)],color=color.gray(0.4), radius=r))
+    
+    bfield=[]
+    bscale = (xmax/3)/mag(B)
+    for x in arange(-xmax, xmax+dx, xmax):
+        for z in arange(-xmax, xmax+dx, xmax):
+            bfield.append(arrow(pos=vector(x,-xmax,z), axis=B*bscale, color=vector(0,0.8,0.8), opacity = 1))   ## opacity 0.5 poor antialiasing
+    jhat = vec(0,1,0)   
+    
+    rpa = [
+        [vector( 0.3, 0, 0 ), vector( 0, 0, 0.3 ) ],
+        [vector( 0, 0, 0.3 ), vector( -0.3, 0, 0 )],
+        [vector( -0.3, 0, 0 ), vector(0, 0, -0.3 )],
+        [vector( 0, 0, -0.3 ), vector( 0.3, 0, 0 )],
+        ]
+        
+    for info in rpa:
+        ring( pos=info[0], axis=info[1], color=color.magenta, radius = 0.05, thickness = 0.01 )
+        
+      
+    
+  
